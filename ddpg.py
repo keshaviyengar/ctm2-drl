@@ -15,10 +15,6 @@ from numpy import inf
 import yaml
 import os
 
-# Create log dir
-log_dir = "/tmp/gym/"
-os.makedirs(log_dir, exist_ok=True)
-
 # Load in parameters
 config = yaml.load(open('ddpg_parameters.yaml'))
 ddpg_params = config['ddpg']

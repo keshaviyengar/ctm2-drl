@@ -32,7 +32,7 @@ ddpg:
   render_eval: False
   memory_limit: 100
   verbose: 1
-  tensorboard_log: '/tmp/tf/'
+  tensorboard_log: '/home/keshav/ctm2_tb'
   _init_setup_model: True
   policy_kwargs: # None
   full_tensorboard_log: True
