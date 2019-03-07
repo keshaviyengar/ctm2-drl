@@ -3,4 +3,4 @@
 	url = git@github.com:keshaviyengar/ctm2-envs.git
 [submodule "stable-baselines"]
 	path = stable-baselines
-	url = git@github.com:hill-a/stable-baselines.git
+	url = git@github.com:keshaviyengar/stable-baselines.git
