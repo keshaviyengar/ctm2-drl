@@ -1,14 +1,21 @@
-FROM araffin/stable-baselines:latest
+FROM tensorflow/tensorflow:1.12.0-gpu-py3
 
-ENV CODE_DIR /root/code
+ENV CODE_DIR /home/code
 ENV VENV /root/venv
+
+WORKDIR $CODE_DIR
 
 COPY ctm2-envs/ $CODE_DIR/ctm2-envs/
 COPY stable-baselines/ $CODE_DIR/stable-baselines/
-RUN . $VENV/bin/activate && \
-	pip install -e $CODE_DIR/ctm2-envs/ && \
-	pip install stable-baselines && \
-	pip install PyYAML
 
-ENV PATH=$VENV/bin:$PATH
+RUN apt-get -y update && apt-get -y install git wget python-dev python3-dev libopenmpi-dev python-pip zlib1g-dev cmake libglib2.0-0 libsm6 libxext6 libfontconfig1 libxrender1
+
+RUN	pip install -e $CODE_DIR/ctm2-envs/ && \
+	pip install PyYAML && \
+	pip install mpi4py
+
+RUN ln -s /usr/local/cuda/lib64/stubs/libcuda.so /usr/local/cuda/lib64/stubs/libcuda.so.1
+RUN LD_LIBRARY_PATH=/usr/local/cuda/lib64/stubs/:$LD_LIBRARY_PATH pip install -e $CODE_DIR/stable-baselines
+RUN rm /usr/local/cuda/lib64/stubs/libcuda.so.1
+
 CMD /bin/bash

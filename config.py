@@ -11,7 +11,6 @@ import numpy as np
 # sigma is how many standard deviations action_space.high is from the mean
 # increasing sigma will result in less samples closer to the limit
 def get_action_noise(env, mean, sigma):
-    env = make_robotics_env(env_id=env, seed=1, allow_early_resets=True)
     action_mean = np.mean([env.action_space.low, env.action_space.high], axis=0)
     action_sigma = (env.action_space.high - action_mean) / sigma
     return NormalActionNoise(mean=action_mean, sigma=action_sigma)
@@ -29,23 +28,23 @@ global_configuration = {
 }
 
 experiment1_configuration = {
-    "env": 'ctm2-continuous-v0',
+    "env": make_robotics_env(env_id="ctm2-continuous-v0", seed=1, allow_early_resets=True),
     "experiment_id": 1,
     "save_model_name": "ddpg_1",
     "gamma": 0.99,
     "memory_policy": None,
     "eval_env": None,
     "nb_train_steps": 300,
-    "nb_rollout_steps": 100,
-    "nb_eval_steps": 100,
+    "nb_rollout_steps": 250,
+    "nb_eval_steps": 250,
     "action_noise_mean": 0,
     "action_noise_sigma": 1,
     "tau": 0.001,
-    "batch_size": 28,
-    "param_noise_initial_stddev": 0.0,
+    "batch_size": 128,
+    "param_noise_initial_stddev": 1.0,
     "param_noise_desired_action_stddev": 0.0,
     "param_noise_adaption_coefficient": 0.0,
-    "param_noise_adaption_interval": 50,
+    "param_noise_adaption_interval": 5000,
     "normalize_returns": False,
     "enable_popart": False,
     "normalize_observations": False,
@@ -60,26 +59,26 @@ experiment1_configuration = {
     "render_eval": False,
     "memory_limit": 100,
     "verbose": 1,
-    "tensorboard_log": 'home/keshav/ctm2_tb',
-    "monitor_log": '/home/keshav/monitor_log',
+    "tensorboard_log": 'ctm2_tb/',
+    "monitor_log": 'monitor_log/',
     "_init_setup_model": True,
     "policy_kwargs": None,
     "full_tensorboard_log": True,
-    "total_timesteps": 100000,
-    "log_interval": 100
+    "total_timesteps": 10000,
+    "log_interval": 10
 }
 
 experiment1 = {
     "algorithm": "DDPG",
     "policy": MlpPolicy,
-    "env": make_robotics_env(env_id=experiment1_configuration['env'], seed=1, allow_early_resets=True),
+    "env": experiment1_configuration['env'],
     "action_noise": get_action_noise(experiment1_configuration['env'],
                                      experiment1_configuration['action_noise_mean'],
                                      experiment1_configuration['action_noise_sigma']),
     "param_noise": get_param_noise(experiment1_configuration['param_noise_initial_stddev'],
                                    experiment1_configuration['param_noise_desired_action_stddev'],
                                    experiment1_configuration['param_noise_adaption_interval']),
-    "eval_env": make_robotics_env(env_id=experiment1_configuration['env'], seed=1, allow_early_resets=True),
+    "eval_env": make_robotics_env(env_id="ctm2-continuous-v0", seed=1, allow_early_resets=True),
     "memory_policy": None,
     "configuration": experiment1_configuration
 }
