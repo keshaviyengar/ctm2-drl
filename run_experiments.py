@@ -1,6 +1,20 @@
 from stable_baselines import DDPG
 import os
 from config import global_configuration, experiments
+import threading
+
+
+def launchTensorBoard(tensorboard_path):
+    import os
+    os.system('tensorboard --logdir=' + tensorboard_path)
+    return
+
+
+print("Starting tensorboard thread.")
+t = threading.Thread(target=launchTensorBoard, args=(["ctm2_tb/"]))
+t.start()
+
+print("Starting experiments.")
 
 if global_configuration["single_gpu"]:
     os.environ["CUDA_VISIBLE_DEVICES"] = global_configuration['gpu_id']
@@ -15,7 +29,8 @@ for exp in experiments:
                      gamma=config['gamma'], nb_train_steps=config['nb_train_steps'],
                      nb_rollout_steps=config['nb_rollout_steps'], nb_eval_steps=config['nb_eval_steps'],
                      normalize_observations=config['normalize_observations'], tau=config['tau'],
-                     batch_size=config['batch_size'], param_noise_adaption_interval=config['param_noise_adaption_interval'],
+                     batch_size=config['batch_size'],
+                     param_noise_adaption_interval=config['param_noise_adaption_interval'],
                      normalize_returns=config['normalize_returns'], enable_popart=config['enable_popart'],
                      observation_range=config['observation_range'], critic_l2_reg=config['critic_l2_reg'],
                      return_range=config['return_range'], actor_lr=config['actor_lr'],critic_lr=config['critic_lr'],
@@ -33,3 +48,4 @@ for exp in experiments:
     model.learn(total_timesteps=config['total_timesteps'], callback=None, seed=global_configuration['seed'],
                 log_interval=config['log_interval'], tb_log_name=exp['algorithm'], reset_num_timesteps=True)
 
+    model.save(algo + config['experiment_id'])
