@@ -48,4 +48,4 @@ for exp in experiments:
     model.learn(total_timesteps=config['total_timesteps'], callback=None, seed=global_configuration['seed'],
                 log_interval=config['log_interval'], tb_log_name=exp['algorithm'], reset_num_timesteps=True)
 
-    model.save(algo + config['experiment_id'])
+    model.save(algo + str(config['experiment_id']))
