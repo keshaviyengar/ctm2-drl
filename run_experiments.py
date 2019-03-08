@@ -4,14 +4,14 @@ from config import global_configuration, experiments
 import threading
 
 
-def launchTensorBoard(tensorboard_path):
+def launch_tensorboard(tensorboard_path):
     import os
     os.system('tensorboard --logdir=' + tensorboard_path)
     return
 
 
 print("Starting tensorboard thread.")
-t = threading.Thread(target=launchTensorBoard, args=(["ctm2_tb/"]))
+t = threading.Thread(target=launch_tensorboard, args=(["ctm2_tb/"]))
 t.start()
 
 print("Starting experiments.")
