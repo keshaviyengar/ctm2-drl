@@ -62,7 +62,7 @@ experiment1_configuration = {
     "_init_setup_model": True,
     "policy_kwargs": None,
     "full_tensorboard_log": True,
-    "total_timesteps": 10000,
+    "total_timesteps": 1000000,
     "log_interval": 10
 }
 
@@ -102,7 +102,7 @@ experiment2_configuration = {
     "_init_setup_model": True,
     "policy_kwargs": None,
     "full_tensorboard_log": True,
-    "total_timesteps": 10000,
+    "total_timesteps": 1000000,
     "log_interval": 10
 }
 
@@ -133,7 +133,7 @@ experiment2 = {
                                    experiment1_configuration['param_noise_adaption_interval']),
     "eval_env": experiment1_configuration['eval_env'],
     "memory_policy": None,
-    "configuration": experiment1_configuration
+    "configuration": experiment2_configuration
 }
 
 experiments = [experiment1, experiment2]
