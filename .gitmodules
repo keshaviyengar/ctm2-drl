@@ -1,6 +1,3 @@
 [submodule "ctm2-envs"]
 	path = ctm2-envs
 	url = git@github.com:keshaviyengar/ctm2-envs.git
-[submodule "stable-baselines"]
-	path = stable-baselines
-	url = git@github.com:keshaviyengar/stable-baselines.git
