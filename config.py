@@ -1,139 +1,168 @@
-import gym
-import ctm2_envs
+import os
 
-from stable_baselines.common.cmd_util import make_robotics_env
-from stable_baselines.ddpg.policies import MlpPolicy
-from stable_baselines.ddpg.noise import NormalActionNoise, OrnsteinUhlenbeckActionNoise, AdaptiveParamNoiseSpec
+GPU_ID = 0
 
-import numpy as np
+# DDPG_DENSE_PARAMS
+DDPG_DENSE_LAUNCH_PARAMS = [
+    '--env', 'ctm2-continuous-dense-v0',
+    '--extra_import', 'ctm2_envs',
+    '--alg', 'her',
+    '--num_cpu', '3',
+    '--num_timesteps', str(2.5e6),
+    # env
+    '--max_u', '1.',  # max absolute value of actions on different coordinates
+    # ddpg
+    '--layers', '1',  # number of layers in the critic/actor networks
+    '--hidden', '64',  # number of neurons in each hidden layers
+    '--network_class', 'baselines.her.actor_critic:ActorCritic',
+    '--Q_lr', '0.001',  # critic learning rate
+    '--pi_lr', '0.001',  # actor learning rate
+    '--buffer_size', str(int(1E6)),  # for experience replay
+    '--polyak', '0.95',  # polyak averaging coefficient
+    '--action_l2', '1.0',  # quadratic penalty on actions (before rescaling by max_u)
+    '--clip_obs', '200.',
+    '--scope', 'ddpg',  # can be tweaked for testing
+    '--relative_goals', 'False',
+    # training
+    '--n_cycles', '50',  # per epoch
+    '--rollout_batch_size', '1',  # per mpi thread
+    '--n_batches', '40',  # training batches per cycle
+    '--batch_size', '256',  # per mpi thread, measured in transitions and reduced to even multiple of chunk_length.
+    '--n_test_rollouts', '10',  # number of test rollouts per epoch, each consists of rollout_batch_size rollouts
+    '--test_with_polyak', 'False',  # run test episodes with the target network
+    # exploration
+    '--random_eps', '0.3',  # percentage of time a random action is taken
+    '--noise_eps', '0.2',  # std of gaussian noise added to not-completely-random actions as a percentage of max_u
+    # HER
+    '--replay_strategy', 'none',  # supported modes: future, none
+    '--replay_k', '4',  # number of additional goals used for replay, only used if off_policy_data=future
+    # normalization
+    '--norm_eps', '1',  # epsilon used for observation normalization
+    '--norm_clip', '5',  # normalized observations are cropped to this values
+    '--save_path', 'policies/her'
+]
+
+# DDPG_SPARSE_PARAMS
+DDPG_SPARSE_LAUNCH_PARAMS = [
+    '--env', 'ctm2-continuous-sparse-v0',
+    '--extra_import', 'ctm2_envs',
+    '--alg', 'her',
+    '--num_cpu', '3',
+    '--num_timesteps', str(2.5e6),
+    # env
+    '--max_u', '1.',  # max absolute value of actions on different coordinates
+    # ddpg
+    '--layers', '1',  # number of layers in the critic/actor networks
+    '--hidden', '64',  # number of neurons in each hidden layers
+    '--network_class', 'baselines.her.actor_critic:ActorCritic',
+    '--Q_lr', '0.001',  # critic learning rate
+    '--pi_lr', '0.001',  # actor learning rate
+    '--buffer_size', str(int(1E6)),  # for experience replay
+    '--polyak', '0.95',  # polyak averaging coefficient
+    '--action_l2', '1.0',  # quadratic penalty on actions (before rescaling by max_u)
+    '--clip_obs', '200.',
+    '--scope', 'ddpg',  # can be tweaked for testing
+    '--relative_goals', 'False',
+    # training
+    '--n_cycles', '50',  # per epoch
+    '--rollout_batch_size', '1',  # per mpi thread
+    '--n_batches', '40',  # training batches per cycle
+    '--batch_size', '256',  # per mpi thread, measured in transitions and reduced to even multiple of chunk_length.
+    '--n_test_rollouts', '10',  # number of test rollouts per epoch, each consists of rollout_batch_size rollouts
+    '--test_with_polyak', 'False',  # run test episodes with the target network
+    # exploration
+    '--random_eps', '0.3',  # percentage of time a random action is taken
+    '--noise_eps', '0.2',  # std of gaussian noise added to not-completely-random actions as a percentage of max_u
+    # HER
+    '--replay_strategy', 'none',  # supported modes: future, none
+    '--replay_k', '4',  # number of additional goals used for replay, only used if off_policy_data=future
+    # normalization
+    '--norm_eps', '1',  # epsilon used for observation normalization
+    '--norm_clip', '5',  # normalized observations are cropped to this values
+    '--save_path', 'policies/her'
+]
+
+# DDPG_SPARSE_PARAMS
+DDPG_HER_DENSE_LAUNCH_PARAMS = [
+    '--env', 'ctm2-continuous-dense-v0',
+    '--extra_import', 'ctm2_envs',
+    '--alg', 'her',
+    '--num_cpu', '3',
+    '--num_timesteps', str(2.5e6),
+    # env
+    '--max_u', '1.',  # max absolute value of actions on different coordinates
+    # ddpg
+    '--layers', '1',  # number of layers in the critic/actor networks
+    '--hidden', '64',  # number of neurons in each hidden layers
+    '--network_class', 'baselines.her.actor_critic:ActorCritic',
+    '--Q_lr', '0.001',  # critic learning rate
+    '--pi_lr', '0.001',  # actor learning rate
+    '--buffer_size', str(int(1E6)),  # for experience replay
+    '--polyak', '0.95',  # polyak averaging coefficient
+    '--action_l2', '1.0',  # quadratic penalty on actions (before rescaling by max_u)
+    '--clip_obs', '200.',
+    '--scope', 'ddpg',  # can be tweaked for testing
+    '--relative_goals', 'False',
+    # training
+    '--n_cycles', '50',  # per epoch
+    '--rollout_batch_size', '1',  # per mpi thread
+    '--n_batches', '40',  # training batches per cycle
+    '--batch_size', '256',  # per mpi thread, measured in transitions and reduced to even multiple of chunk_length.
+    '--n_test_rollouts', '10',  # number of test rollouts per epoch, each consists of rollout_batch_size rollouts
+    '--test_with_polyak', 'False',  # run test episodes with the target network
+    # exploration
+    '--random_eps', '0.3',  # percentage of time a random action is taken
+    '--noise_eps', '0.2',  # std of gaussian noise added to not-completely-random actions as a percentage of max_u
+    # HER
+    '--replay_strategy', 'future',  # supported modes: future, none
+    '--replay_k', '4',  # number of additional goals used for replay, only used if off_policy_data=future
+    # normalization
+    '--norm_eps', '1',  # epsilon used for observation normalization
+    '--norm_clip', '5',  # normalized observations are cropped to this values
+    '--save_path', 'policies/her'
+]
+
+# DDPG_SPARSE_PARAMS
+DDPG_HER_SPARSE_LAUNCH_PARAMS = [
+    '--env', 'ctm2-continuous-sparse-v0',
+    '--extra_import', 'ctm2_envs',
+    '--alg', 'her',
+    '--num_cpu', '3',
+    '--num_timesteps', str(2.5e6),
+    # env
+    '--max_u', '1.',  # max absolute value of actions on different coordinates
+    # ddpg
+    '--layers', '1',  # number of layers in the critic/actor networks
+    '--hidden', '64',  # number of neurons in each hidden layers
+    '--network_class', 'baselines.her.actor_critic:ActorCritic',
+    '--Q_lr', '0.001',  # critic learning rate
+    '--pi_lr', '0.001',  # actor learning rate
+    '--buffer_size', str(int(1E6)),  # for experience replay
+    '--polyak', '0.95',  # polyak averaging coefficient
+    '--action_l2', '1.0',  # quadratic penalty on actions (before rescaling by max_u)
+    '--clip_obs', '200.',
+    '--scope', 'ddpg',  # can be tweaked for testing
+    '--relative_goals', 'False',
+    # training
+    '--n_cycles', '50',  # per epoch
+    '--rollout_batch_size', '1',  # per mpi thread
+    '--n_batches', '40',  # training batches per cycle
+    '--batch_size', '256',  # per mpi thread, measured in transitions and reduced to even multiple of chunk_length.
+    '--n_test_rollouts', '10',  # number of test rollouts per epoch, each consists of rollout_batch_size rollouts
+    '--test_with_polyak', 'False',  # run test episodes with the target network
+    # exploration
+    '--random_eps', '0.3',  # percentage of time a random action is taken
+    '--noise_eps', '0.2',  # std of gaussian noise added to not-completely-random actions as a percentage of max_u
+    # HER
+    '--replay_strategy', 'future',  # supported modes: future, none
+    '--replay_k', '4',  # number of additional goals used for replay, only used if off_policy_data=future
+    # normalization
+    '--norm_eps', '1',  # epsilon used for observation normalization
+    '--norm_clip', '5',  # normalized observations are cropped to this values
+    '--save_path', 'policies/her'
+]
+
+EXPERIMENTS = [DDPG_DENSE_LAUNCH_PARAMS, DDPG_SPARSE_LAUNCH_PARAMS,
+               DDPG_HER_DENSE_LAUNCH_PARAMS, DDPG_HER_SPARSE_LAUNCH_PARAMS]
 
 
-# sigma is how many standard deviations action_space.high is from the mean
-# increasing sigma will result in less samples closer to the limit
-def get_action_noise(env, mean, sigma):
-    action_mean = np.mean([env.action_space.low, env.action_space.high], axis=0)
-    action_sigma = (env.action_space.high - action_mean) / sigma
-    return NormalActionNoise(mean=action_mean, sigma=action_sigma)
-
-
-def get_param_noise(initial_stddev, desired_action_stddev, adoption_coefficient):
-    return AdaptiveParamNoiseSpec(initial_stddev, desired_action_stddev, adoption_coefficient)
-
-
-global_configuration = {
-    "single_gpu": False,
-    "gpu_id": '0',
-    "seed": 1
-}
-
-experiment1_configuration = {
-    "env": make_robotics_env(env_id="ctm2-continuous-dense-v0", seed=1, allow_early_resets=True),
-    "experiment_id": 1,
-    "save_model_name": "ddpg_1",
-    "gamma": 0.99,
-    "memory_policy": None,
-    "eval_env": make_robotics_env(env_id="ctm2-continuous-dense-v0", seed=1, allow_early_resets=True),
-    "nb_train_steps": 300,
-    "nb_rollout_steps": 250,
-    "nb_eval_steps": 250,
-    "action_noise_mean": 0,
-    "action_noise_sigma": 1,
-    "tau": 0.001,
-    "batch_size": 128,
-    "param_noise_initial_stddev": 1.0,
-    "param_noise_desired_action_stddev": 0.0,
-    "param_noise_adaption_coefficient": 0.0,
-    "param_noise_adaption_interval": 5000,
-    "normalize_returns": False,
-    "enable_popart": False,
-    "normalize_observations": False,
-    "observation_range": (-5.0, 5.0),
-    "critic_l2_reg": 0.0,
-    "return_range": (-100, 100),
-    "actor_lr": 0.0001,
-    "critic_lr": 0.001,
-    "clip_norm": None,
-    "reward_scale": 0.0,
-    "render": False,
-    "render_eval": False,
-    "memory_limit": 100,
-    "verbose": 1,
-    "tensorboard_log": 'ctm2_tb/',
-    "_init_setup_model": True,
-    "policy_kwargs": None,
-    "full_tensorboard_log": True,
-    "total_timesteps": 1000000,
-    "log_interval": 10
-}
-
-experiment2_configuration = {
-    "env": make_robotics_env(env_id="ctm2-continuous-sparse-v0", seed=1, allow_early_resets=True),
-    "experiment_id": 2,
-    "save_model_name": "ddpg_1",
-    "gamma": 0.99,
-    "memory_policy": None,
-    "eval_env": make_robotics_env(env_id="ctm2-continuous-sparse-v0", seed=1, allow_early_resets=True),
-    "nb_train_steps": 300,
-    "nb_rollout_steps": 250,
-    "nb_eval_steps": 250,
-    "action_noise_mean": 0,
-    "action_noise_sigma": 1,
-    "tau": 0.001,
-    "batch_size": 128,
-    "param_noise_initial_stddev": 1.0,
-    "param_noise_desired_action_stddev": 0.0,
-    "param_noise_adaption_coefficient": 0.0,
-    "param_noise_adaption_interval": 5000,
-    "normalize_returns": False,
-    "enable_popart": False,
-    "normalize_observations": False,
-    "observation_range": (-5.0, 5.0),
-    "critic_l2_reg": 0.0,
-    "return_range": (-100, 100),
-    "actor_lr": 0.0001,
-    "critic_lr": 0.001,
-    "clip_norm": None,
-    "reward_scale": 0.0,
-    "render": False,
-    "render_eval": False,
-    "memory_limit": 100,
-    "verbose": 1,
-    "tensorboard_log": 'ctm2_tb/',
-    "_init_setup_model": True,
-    "policy_kwargs": None,
-    "full_tensorboard_log": True,
-    "total_timesteps": 1000000,
-    "log_interval": 10
-}
-
-experiment1 = {
-    "algorithm": "DDPG",
-    "policy": MlpPolicy,
-    "env": experiment1_configuration['env'],
-    "action_noise": get_action_noise(experiment1_configuration['env'],
-                                     experiment1_configuration['action_noise_mean'],
-                                     experiment1_configuration['action_noise_sigma']),
-    "param_noise": get_param_noise(experiment1_configuration['param_noise_initial_stddev'],
-                                   experiment1_configuration['param_noise_desired_action_stddev'],
-                                   experiment1_configuration['param_noise_adaption_interval']),
-    "eval_env": experiment1_configuration['eval_env'],
-    "memory_policy": None,
-    "configuration": experiment1_configuration
-}
-
-experiment2 = {
-    "algorithm": "DDPG",
-    "policy": MlpPolicy,
-    "env": experiment1_configuration['env'],
-    "action_noise": get_action_noise(experiment1_configuration['env'],
-                                     experiment1_configuration['action_noise_mean'],
-                                     experiment1_configuration['action_noise_sigma']),
-    "param_noise": get_param_noise(experiment1_configuration['param_noise_initial_stddev'],
-                                   experiment1_configuration['param_noise_desired_action_stddev'],
-                                   experiment1_configuration['param_noise_adaption_interval']),
-    "eval_env": experiment1_configuration['eval_env'],
-    "memory_policy": None,
-    "configuration": experiment2_configuration
-}
-
-experiments = [experiment1, experiment2]
