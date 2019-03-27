@@ -7,5 +7,5 @@ echo "Executing tensorboard in the docker (gpu image):"
 
 docker run --runtime=nvidia -it --rm \
   --mount src=$(pwd),target=/root/code/ctm2-drl,type=bind keshaviyengar/ctm2_drl\
-  bash -c "cd /root/code/ctm2-drl/ && tensorboard --host 0.0.0.0 --logdir='ctm2_tb/'"
+  bash -c "cd /root/code/ctm2-drl/ && tensorboard --host 0.0.0.0 --logdir='logs/'"
 

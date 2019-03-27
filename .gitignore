@@ -1,3 +1,5 @@
+/policies
+/logs
 /.idea
 *.pkl
 *.vscode
