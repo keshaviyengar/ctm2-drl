@@ -4,7 +4,7 @@ from argparse import ArgumentParser
 from baselines.run import main
 from config import DDPG_DENSE, DDPG_SPARSE, HER_DENSE, HER_SPARSE
 
-
+os.environ['OPENAI_LOG_FORMAT'] = 'stdout,log,csv,tensorboard'
 os.environ["CUDA_VISIBLE_DEVICES"] = DDPG_DENSE['gpu_id']
 
 parser = ArgumentParser()
