@@ -14,7 +14,7 @@ RUN	pip3 install -e $CODE_DIR/ctm2-envs/ && \
 	pip3 install mpi4py
 
 RUN ln -s /usr/local/cuda/lib64/stubs/libcuda.so /usr/local/cuda/lib64/stubs/libcuda.so.1
-RUN LD_LIBRARY_PATH=/usr/local/cuda/lib64/stubs/:$LD_LIBRARY_PATH pip3 install git+git://github.com/openai/baselines.git#egg=baselines
+RUN LD_LIBRARY_PATH=/usr/local/cuda/lib64/stubs/:$LD_LIBRARY_PATH pip3 install git+git://github.com/keshaviyengar/baselines.git#egg=baselines
 RUN rm /usr/local/cuda/lib64/stubs/libcuda.so.1
 
 CMD /bin/bash
