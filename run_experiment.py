@@ -3,7 +3,7 @@ from argparse import ArgumentParser
 from datetime import datetime
 
 from baselines.run import main
-from config import HER_SPARSE_1_V0, HER_SPARSE_2_V0, HER_SPARSE_2_V1, HER_SPARSE_2_V2
+from config import HER_SPARSE_1_V0, HER_SPARSE_2_V0, HER_SPARSE_2_V1
 
 os.environ['OPENAI_LOG_FORMAT'] = 'stdout,log,csv,tensorboard'
 now = datetime.now()
