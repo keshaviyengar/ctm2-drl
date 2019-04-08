@@ -10,6 +10,7 @@ HER_SPARSE_1_V0 = {
         '--alg', 'her',
         '--num_cpu', '19',
         '--num_timesteps', str(8e6),
+        '--render', 'False',
         # env
         '--max_u', '1.',  # max absolute value of actions on different coordinates
         # ddpg
@@ -53,6 +54,7 @@ HER_SPARSE_1_V1 = {
         '--alg', 'her',
         '--num_cpu', '19',
         '--num_timesteps', str(8e6),
+        '--render', 'False',
         # env
         '--max_u', '1.',  # max absolute value of actions on different coordinates
         # ddpg
@@ -96,6 +98,7 @@ HER_SPARSE_1_V2 = {
         '--alg', 'her',
         '--num_cpu', '19',
         '--num_timesteps', str(2.5e6),
+        '--render', 'False',
         # env
         '--max_u', '1.',  # max absolute value of actions on different coordinates
         # ddpg
@@ -138,6 +141,7 @@ HER_SPARSE_1_V3 = {
         '--alg', 'her',
         '--num_cpu', '19',
         '--num_timesteps', str(2.5e6),
+        '--render', 'False',
         # env
         '--max_u', '1.',  # max absolute value of actions on different coordinates
         # ddpg
