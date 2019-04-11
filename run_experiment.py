@@ -3,7 +3,7 @@ from argparse import ArgumentParser
 from datetime import datetime
 
 from baselines.run import main
-from config import HER_SPARSE_1_V0, HER_SPARSE_1_V1, HER_SPARSE_1_V2, HER_SPARSE_1_V3
+from config import HER_SPARSE_1_V0, HER_SPARSE_1_V1, HER_SPARSE_1_V2, HER_SPARSE_1_V3, HER_SPARSE_2_V0
 
 os.environ['OPENAI_LOG_FORMAT'] = 'stdout,log,csv,tensorboard'
 now = datetime.now()
@@ -25,17 +25,22 @@ if args.experiment == HER_SPARSE_1_V0['name']:
 elif args.experiment == HER_SPARSE_1_V1['name']:
     os.environ["CUDA_VISIBLE_DEVICES"] = HER_SPARSE_1_V1['gpu_id']
     os.environ['OPENAI_LOGDIR'] = directory + HER_SPARSE_1_V1['name']
-    main(HER_SPARSE_1_V0['parameters'])
+    main(HER_SPARSE_1_V1['parameters'])
 
 elif args.experiment == HER_SPARSE_1_V2['name']:
-    os.environ["CUDA_VISIBLE_DEVICES"] = HER_SPARSE_1_V3['gpu_id']
-    os.environ['OPENAI_LOGDIR'] = directory + HER_SPARSE_1_V3['name']
-    main(HER_SPARSE_1_V3['parameters'])
+    os.environ["CUDA_VISIBLE_DEVICES"] = HER_SPARSE_1_V2['gpu_id']
+    os.environ['OPENAI_LOGDIR'] = directory + HER_SPARSE_1_V2['name']
+    main(HER_SPARSE_1_V2['parameters'])
 
 elif args.experiment == HER_SPARSE_1_V3['name']:
     os.environ["CUDA_VISIBLE_DEVICES"] = HER_SPARSE_1_V3['gpu_id']
     os.environ['OPENAI_LOGDIR'] = directory + HER_SPARSE_1_V3['name']
     main(HER_SPARSE_1_V3['parameters'])
+
+elif args.experiment == HER_SPARSE_2_V0['name']:
+    os.environ["CUDA_VISIBLE_DEVICES"] = HER_SPARSE_2_V0['gpu_id']
+    os.environ['OPENAI_LOGDIR'] = directory + HER_SPARSE_2_V0['name']
+    main(HER_SPARSE_2_V0['parameters'])
 
 else:
     raise NameError
