@@ -215,7 +215,7 @@ HER_SPARSE_2_V0 = {
         # normalization
         '--norm_eps', '0.01',  # epsilon used for observation normalization
         '--norm_clip', '5',  # normalized observations are cropped to this values
-        '--save_path', 'policies/' + dt_string + '/her_sparse_2_v0'],
+        '--save_path', 'logs/' + dt_string + '/her_sparse_2_v0'],
     'gpu_id': '1',
     'name': 'her_sparse_2_v0'
 }
