@@ -188,8 +188,8 @@ HER_SPARSE_2_V0 = {
         # env
         '--max_u', '1.',  # max absolute value of actions on different coordinates
         # ddpg
-        '--layers', '3',  # number of layers in the critic/actor networks
-        '--hidden', '256',  # number of neurons in each hidden layers
+        '--layers', '1',  # number of layers in the critic/actor networks
+        '--hidden', '64',  # number of neurons in each hidden layers
         '--network_class', 'baselines.her.actor_critic:ActorCritic',
         '--Q_lr', '0.001',  # critic learning rate
         '--pi_lr', '0.001',  # actor learning rate
