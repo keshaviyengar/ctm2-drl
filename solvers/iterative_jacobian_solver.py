@@ -1,72 +1,60 @@
 #!/usr/bin/env python
 
 from math import sin, cos, asin, atan2, sqrt
+from solvers.jacobian_calculation import ComputeJacobianEquation
 import numpy as np
 
 
 class IterativeIKinematics:
-        def __init__(self, l_tip, k, goal_tolerance, delta, config, num_tubes):
+        def __init__(self, l_tip, k, goal_tolerance, delta, method, num_tubes):
             self.l_tip = l_tip
             self.k = k
             self.goal_tolerance = goal_tolerance
             self.delta = delta
-            self.config = config
+            self.method = method
             self.num_tubes = num_tubes
+            self.jac_obj = ComputeJacobianEquation(num_tubes=num_tubes,
+                                                    save_path='' + str(num_tubes) + '_tubes')
 
         def compute_inverse_jacobian(self, joint_states):
             """
             Provides the numerical inverse jacobian as calculated by sympy
-            :param joint: Current joint value
-            :type joint:numpy.array
+            :param joint_states: Current joint value
+            :type joint_states:numpy.array
             :return: Matrix containing the inverse jacobian
             :rtype: numpy.ndarray
             """
-            psi = 0
-            phi = 0
-            theta = 0
-            r = 0
-            gamma = 0
-            distal_length = 0
             if self.config == "distal":
                 gamma = joint_states[0::2]
                 distal_length = joint_states[1::2]
-            elif self.config == "proximal":
-                psi = joint_states[0]
-                phi = joint_states[1]
-                theta = joint_states[2]
-                r = joint_states[3]
-            elif self.config == "full":
-                # proximal
-                psi = joint_states[0]
-                phi = joint_states[1]
-                theta = joint_states[2]
-                r = joint_states[3]
-                # distal
-                gamma = joint_states[4::2]
-                distal_length = joint_states[5::2]
-
             else:
                 raise NameError
 
             k = self.k
+            l_tip = self.l_tip
+            l = self.l_tip
 
             for i in range(0, self.num_tubes):
-                if distal_length[i] > self.l_tip:
-                    l_tip = self.l_tip
-                    l = distal_length[i] - l_tip
+                if distal_length[i] > self.l_tip[i]:
+                    l_tip[i] = self.l_tip[i]
+                    l[i] = distal_length[i] - l_tip[i]
                 else:
-                    l_tip = distal_length[i]
-                    l = 0.0
+                    l_tip[i] = distal_length[i]
+                    l[i] = 0.0
 
-            # computed with sympy
-            jac = np.array([[(k * l_tip * sin(k * l) - cos(k * l) + 1) * cos(gamma) / k,
-                             (k ** 2 * l_tip * cos(k * l) + k * sin(k * l)) * sin(gamma) / k, 0],
-                            [-(-k * l_tip * sin(k * l) + cos(k * l) - 1) * sin(gamma) / k,
-                             (-k ** 2 * l_tip * cos(k * l) - k * sin(k * l)) * cos(gamma) / k, 0],
-                            [0, - k * l_tip * sin(k * l) + cos(k * l), 0]], np.float)
+            jac = self.jac_obj.get_jacobian()
+            jac = jac(k, l_tip, gamma, l)
+            if self.method == 'transpose':
+                ijac = np.transpose(jac)
+            elif self.method == 'inverse':
+                ijac = np.linalg.pinv(jac)
+            else:
+                print('method not set, defaulting to transpose.')
+                ijac = np.transpose(jac)
+
+            return ijac
 
 
-            return np.linalg.pinv(jac)
 
         def compute_action(self, state):
             commanded_pose = state['desired_goal']
@@ -79,8 +67,7 @@ class IterativeIKinematics:
             if self.check_difference(diff_pose):
                 inv_jac = self.compute_inverse_jacobian(current_joint)
                 diff_joint = self.get_diff_joint(inv_jac, diff_pose)
-                new_action = diff_joint[-3:-1]
-                return new_action
+                return diff_joint
 
         def check_difference(self, diff_pose):
             """
