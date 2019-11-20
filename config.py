@@ -8,14 +8,14 @@ HER_SPARSE_1_V0 = {
         '--env', 'distal-1-continuous-sparse-mm-v0',
         '--extra_import', 'ctm2_envs',
         '--alg', 'her',
-        '--num_cpu', '19',
+        '--num_cpu', '50',
         '--num_timesteps', str(8e6),
         '--render', 'False',
         # env
         '--max_u', '1.',  # max absolute value of actions on different coordinates
         # ddpg
-        '--layers', '1',  # number of layers in the critic/actor networks
-        '--hidden', '32',  # number of neurons in each hidden layers
+        '--layers', '3',  # number of layers in the critic/actor networks
+        '--hidden', '12',  # number of neurons in each hidden layers
         '--network_class', 'baselines.her.actor_critic:ActorCritic',
         '--Q_lr', '0.001',  # critic learning rate
         '--pi_lr', '0.001',  # actor learning rate
@@ -182,14 +182,14 @@ HER_SPARSE_2_V0 = {
         '--env', 'distal-2-continuous-sparse-mm-v0',
         '--extra_import', 'ctm2_envs',
         '--alg', 'her',
-        '--num_cpu', '19',
-        '--num_timesteps', str(2.5e6),
+        '--num_cpu', '50',
+        '--num_timesteps', str(4.5e6),
         '--render', 'False',
         # env
         '--max_u', '1.',  # max absolute value of actions on different coordinates
         # ddpg
-        '--layers', '3',  # number of layers in the critic/actor networks
-        '--hidden', '32',  # number of neurons in each hidden layers
+        '--layers', '5',  # number of layers in the critic/actor networks
+        '--hidden', '64',  # number of neurons in each hidden layers
         '--network_class', 'baselines.her.actor_critic:ActorCritic',
         '--Q_lr', '0.001',  # critic learning rate
         '--pi_lr', '0.001',  # actor learning rate
